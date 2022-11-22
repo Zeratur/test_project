@@ -8,6 +8,7 @@ import pymysql
 import configparser
 from configparser import ConfigParser
 from pyspark.sql import SparkSession
+from pyspark.sql import dataframe as df
 
 
 def getConfig(file_name, section, option):
@@ -35,10 +36,22 @@ def read_db(table, spark):
     """
     :param table: the table name of the target table
     :param spark: sparkSession object
-    :return:
+    :return: return nothing
     """
     url = 'jdbc:mariadb://' + host + ':' + port + '/' + database + '?useSSL=false'
     return spark.read.option("driver", "org.mariadb.jdbc.Driver") \
+        .jdbc(url=url, table=table, properties=properties)
+
+
+def write_db(df, table, mode):
+    """
+    :param df: the data frame which you are writing in the database
+    :param table: the target table to which you are writing data
+    :param mode: "append" or "overwrite"
+    :return: return nothing
+    """
+    url = 'jdbc:mariadb://' + host + ':' + port + '/' + database + '?useSSL=false'
+    return df.write.mode(mode).option("truncate", "false").option("driver", "org.mariadb.jdbc.Driver") \
         .jdbc(url=url, table=table, properties=properties)
 
 
@@ -56,12 +69,12 @@ def write_xlsx(df, mode, data_address, file_name):
         .option("dateFormat", "yyyy-mm-dd hh:mm:ss") \
         .option("timestampFormat", "yyyy-mm-dd hh:mm:ss") \
         .mode(mode) \
-        .save(HOME_DIR+"/output/" + file_name + ".xlsx")
+        .save(HOME_DIR + "/output/" + file_name + ".xlsx")
 
 
 spark = SparkSession.builder \
     .getOrCreate()
 
-df = read_db("emp_test01", spark)
-df.show()
-write_xlsx(df, mode="append", data_address="A1", file_name="test01")
+df01 = read_db("emp_test01", spark)
+df01.show()
+write_xlsx(df01, mode="append", data_address="A1", file_name="test01")
