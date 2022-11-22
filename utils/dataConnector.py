@@ -2,9 +2,8 @@ import os
 import sys
 
 HOME_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(HOME_DIR + "/lib")
+sys.path.append(HOME_DIR)
 print(HOME_DIR)
-print(sys.path)
 import pymysql
 import configparser
 from configparser import ConfigParser
@@ -53,15 +52,16 @@ def write_xlsx(df, mode, data_address, file_name):
     """
     df.write.format("com.crealytics.spark.excel") \
         .option("dataAddress", data_address) \
-        .option("header", "false") \
+        .option("header", "true") \
         .option("dateFormat", "yyyy-mm-dd hh:mm:ss") \
         .option("timestampFormat", "yyyy-mm-dd hh:mm:ss") \
         .mode(mode) \
-        .save("./" + file_name + ".xlsx")
+        .save(HOME_DIR+"/output/" + file_name + ".xlsx")
 
 
 spark = SparkSession.builder \
     .getOrCreate()
 
 df = read_db("emp_test01", spark)
+df.show()
 write_xlsx(df, mode="append", data_address="A1", file_name="test01")
