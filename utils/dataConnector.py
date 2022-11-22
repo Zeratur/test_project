@@ -1,25 +1,34 @@
+import os
+import sys
+
+HOME_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.append(HOME_DIR + "/lib")
+print(HOME_DIR)
+print(sys.path)
 import pymysql
 import configparser
 from configparser import ConfigParser
 from pyspark.sql import SparkSession
-import os
 
 
 def getConfig(file_name, section, option):
-    # create configparser object
+    """
+    :param file_name: config file name
+    :param section: config section
+    :param option: config option
+    :return: the Minimum config object
+    """
     conf = configparser.ConfigParser()
-
-    # read config contents
     conf.read(file_name)
     config = conf.get(section, option)
     return config
 
 
-host = getConfig("config.ini", "mysql", "host")
-port = getConfig("config.ini", "mysql", "port")
-user = getConfig("config.ini", "mysql", "user")
-passwd = getConfig("config.ini", "mysql", "password")
-database = getConfig("config.ini", "mysql", "database")
+host = getConfig("../config/config.ini", "mysql", "host")
+port = getConfig("../config/config.ini", "mysql", "port")
+user = getConfig("../config/config.ini", "mysql", "user")
+passwd = getConfig("../config/config.ini", "mysql", "password")
+database = getConfig("../config/config.ini", "mysql", "database")
 properties = {'user': user, 'password': passwd}
 
 
@@ -44,8 +53,15 @@ def write_xlsx(df, mode, data_address, file_name):
     """
     df.write.format("com.crealytics.spark.excel") \
         .option("dataAddress", data_address) \
-        .option("useHeader", "false") \
+        .option("header", "false") \
         .option("dateFormat", "yyyy-mm-dd hh:mm:ss") \
         .option("timestampFormat", "yyyy-mm-dd hh:mm:ss") \
         .mode(mode) \
-        .save("/"+file_name+".xlsx")  # 要输出的HDFS文件路径.
+        .save("./" + file_name + ".xlsx")
+
+
+spark = SparkSession.builder \
+    .getOrCreate()
+
+df = read_db("emp_test01", spark)
+write_xlsx(df, mode="append", data_address="A1", file_name="test01")
