@@ -24,16 +24,28 @@ properties = {'user': user, 'password': passwd}
 
 
 def read_db(table, spark):
+    """
+    :param table: the table name of the target table
+    :param spark: sparkSession object
+    :return:
+    """
     url = 'jdbc:mariadb://' + host + ':' + port + '/' + database + '?useSSL=false'
     return spark.read.option("driver", "org.mariadb.jdbc.Driver") \
         .jdbc(url=url, table=table, properties=properties)
 
 
-def write_xlsx(df, mode, data_address, file):
+def write_xlsx(df, mode, data_address, file_name):
+    """
+    :param df: data_frame create by spark session
+    :param mode: "append" or "overwrite" AS STRING
+    :param data_address: "'sheet1'!A1" or "'sheet1'!A1:C35" AS STRING
+    :param file_name: "file_name" AS STRING
+    :return: return nothing
+    """
     df.write.format("com.crealytics.spark.excel") \
-        .option("dataAddress", "'My Sheet'!B3:C35") \
+        .option("dataAddress", data_address) \
         .option("useHeader", "false") \
         .option("dateFormat", "yyyy-mm-dd hh:mm:ss") \
         .option("timestampFormat", "yyyy-mm-dd hh:mm:ss") \
-        .mode("append") \
-        .save("/file.xlsx")  # 要输出的HDFS文件路径.
+        .mode(mode) \
+        .save("/"+file_name+".xlsx")  # 要输出的HDFS文件路径.
