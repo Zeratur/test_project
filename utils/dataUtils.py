@@ -9,7 +9,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import dataframe as df
 
 
-class dataUtils:
+class DataUtils:
     def __init__(self):
         self.spark = SparkSession.builder.getOrCreate()
         conf = configparser.ConfigParser()
@@ -96,6 +96,6 @@ class dataUtils:
 
 
 if __name__ == "__main__":
-    du = dataUtils()
+    du = DataUtils()
     df01 = du.read_db("emp_test01")
     df01.show()
