@@ -3,7 +3,6 @@ import sys
 
 HOME_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(HOME_DIR)
-print(HOME_DIR)
 import pymysql
 import configparser
 from configparser import ConfigParser
@@ -24,14 +23,15 @@ class dataUtils:
         database = conf.get("mysql", "database")
         properties = {'user': user, 'password': password}
 
-    def read_db(self, table):
+    def read_db(self, table) -> df.DataFrame:
         """
         :param table: the table name of the target table
         :return: return nothing
         """
         url = 'jdbc:mariadb://' + host + ':' + port + '/' + database + '?useSSL=false'
-        return self.spark.read.option("driver", "org.mariadb.jdbc.Driver") \
+        df = self.spark.read.option("driver", "org.mariadb.jdbc.Driver") \
             .jdbc(url=url, table=table, properties=properties)
+        return df
 
     def write_db(self, df, table, mode):
         """
@@ -72,6 +72,7 @@ class dataUtils:
             .mode(mode) \
             .save(HOME_DIR + "/output/" + file_name + ".xlsx")
 
-du=dataUtils()
-df01 = du.read_db("emp_test01")
-df01.show()
+if __name__=="__main__":
+    du=dataUtils()
+    df01 = du.read_db("emp_test01")
+    df01.show()
