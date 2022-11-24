@@ -5,7 +5,6 @@ HOME_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(HOME_DIR)
 import pymysql
 import configparser
-from configparser import ConfigParser
 from pyspark.sql import SparkSession
 from pyspark.sql import dataframe as df
 
@@ -46,9 +45,9 @@ class dataUtils:
 
     def read_xlsx(self, file_name, data_addr) -> df.DataFrame:
         """
-        :param file_name: The absolute path to the file
-        :param data_addr: The starting cell of the file
-        :return:
+        :param file_name: "C:\\files\\my_xlsx_file.xlsx", double quotes are mandatory!
+        :param data_addr: "'sheet1'!A1" or "'sheet1'!A1:C35" AS STRING
+        :return: dataframe
         """
         df = self.spark.read.format("com.crealytics.spark.excel") \
             .option("header", "true") \
@@ -56,23 +55,35 @@ class dataUtils:
             .load(file_name)
         return df
 
-    def write_xlsx(self, df,  mode, data_address, file_name):
+    def write_xlsx(self, df, mode, data_addr, file_name):
         """
         :param df: data_frame create by spark session
         :param mode: "append" or "overwrite" AS STRING
-        :param data_address: "'sheet1'!A1" or "'sheet1'!A1:C35" AS STRING
+        :param data_addr: "'sheet1'!A1" or "'sheet1'!A1:C35" AS STRING
         :param file_name: "file_name" AS STRING
         :return: return nothing
         """
         df.write.format("com.crealytics.spark.excel") \
             .option("header", "true") \
-            .option("dataAddress", data_address) \
+            .option("dataAddress", data_addr) \
             .option("dateFormat", "yyyy-mm-dd hh:mm:ss") \
             .option("timestampFormat", "yyyy-mm-dd hh:mm:ss") \
             .mode(mode) \
             .save(HOME_DIR + "/output/" + file_name + ".xlsx")
 
-if __name__=="__main__":
-    du=dataUtils()
+    def read_csv(self, file_name, delimiter) -> df.DataFrame:
+        """
+        :param file_name: "C:\\files\\my_csv_file.csv", double quotes are mandatory
+        :param delimiter: "|", double quotes are mandatory
+        :return: dataframe
+        """
+        df = self.spark.read.option("header", "true") \
+            .option("delimiter", delimiter) \
+            .csv(file_name)
+        return df
+
+
+if __name__ == "__main__":
+    du = dataUtils()
     df01 = du.read_db("emp_test01")
     df01.show()
