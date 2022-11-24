@@ -40,7 +40,7 @@ class dataUtils:
         :return: return nothing
         """
         url = 'jdbc:mariadb://' + host + ':' + port + '/' + database + '?useSSL=false'
-        return df.write.mode(mode).option("truncate", "false").option("driver", "org.mariadb.jdbc.Driver") \
+        df.write.mode(mode).option("truncate", "false").option("driver", "org.mariadb.jdbc.Driver") \
             .jdbc(url=url, table=table, properties=properties)
 
     def read_xlsx(self, file_name, data_addr) -> df.DataFrame:
@@ -57,7 +57,7 @@ class dataUtils:
 
     def write_xlsx(self, df, mode, data_addr, file_name):
         """
-        :param df: data_frame create by spark session
+        :param df: the data frame which you are writing in the Excel
         :param mode: "append" or "overwrite" AS STRING
         :param data_addr: "'sheet1'!A1" or "'sheet1'!A1:C35" AS STRING
         :param file_name: "file_name" AS STRING
@@ -81,6 +81,18 @@ class dataUtils:
             .option("delimiter", delimiter) \
             .csv(file_name)
         return df
+
+    def write_csv(self, df, mode, file_name):
+        """
+        :param df: the data frame which you are writing in the csv file
+        :param mode: "append" or "overwrite" AS STRING
+        :param file_name: "file_name" AS STRING
+        :return: return nothing
+        """
+        df.write.format("csv") \
+            .mode(mode) \
+            .option("header", "true") \
+            .save(HOME_DIR + "/output/" + file_name + ".xlsx")
 
 
 if __name__ == "__main__":
